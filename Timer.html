@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Allen Test Timer - Meet</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bg: #0b131c;
+                --mid: #15212e;
+                --white: #e4ecf5;
+                --dull: #98a7b8;
+                --bright-bg: #141f2b;
+            }
+
+            body {
+                background-color: var(--bg);
+                font-family: 'Poppins', sans-serif;
+            }
+
+            .holder {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                border: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            .qs {
+                background: var(--mid);
+                min-height: 40px;
+                border: 2.5px solid var(--white);
+                border-radius: 8px;
+                color: var(--white);
+                text-align: center;
+                max-width: 130px;
+                font-size: large;
+                font-weight: bold;
+            }
+
+            .ex {
+                margin: 15px;
+                display: grid;
+                grid-template-columns: repeat(4, 80px);
+                grid-template-rows: repeat(2, 80px);
+            }
+
+            #race {
+                grid-column: span 2;
+            }
+
+            .exb {
+                margin: 8px;
+                border: 2px solid var(--bg);
+                border-radius: 40px;
+                font-family: 'Poppins', sans-serif;
+                font-weight: bold;
+                background-color: var(--white);
+                color: var(--mid);
+                font-size: large;
+            }
+
+            .panel {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                padding: 20px;
+                background: var(--bright-bg);
+                border-radius: 20px;
+            }
+
+            .strtest {
+                margin-block: 50px;
+                padding-inline: 20px;
+                padding-block: 15px;
+                font-family: 'Poppins', sans-serif;
+                font-weight: bold;
+                font-size: large;
+                border-radius: 10px;
+            }
+
+            .init {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            .fin {
+                display: none;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            .timer {
+                font-family: 'Poppins', sans-serif;
+                color: var(--white);
+                font-size: 15vw;
+                font-weight: bold;
+                margin: 0;
+            }
+
+            .contpan {
+                margin: 15px;
+                display: grid;
+                grid-template-columns: repeat(3, 100px);
+                grid-template-rows: repeat(1, 100px);
+            }
+
+            .contbut {
+                margin: 10px;
+                border-radius: 50%;
+                background: var(--white);
+                color: var(--bright-bg);
+                font-weight: bold;
+                font-size: 30px;
+            }
+
+            .contbut:disabled {
+                background-color: var(--dull);
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="holder">
+            <div class="init">
+                <div class="panel">
+                    <input type="number" placeholder="No of Qs" class="qs"></input>
+                    <div class="ex">
+                        <button class="exb" onclick="ebxListener('O1', this)">O1</button>
+                        <button class="exb" onclick="ebxListener('O2', this)">O2</button>
+                        <button class="exb" onclick="ebxListener('S1', this)">S1</button>
+                        <button class="exb" onclick="ebxListener('S2', this)">S2</button>
+                        <button class="exb" onclick="ebxListener('JM', this)">JM</button>
+                        <button class="exb" onclick="ebxListener('JA', this)">JA</button>
+                        <button class="exb" onclick="ebxListener('Race', this)" id="race">Race</button>
+                    </div>
+                </div>
+                <button class="strtest" onclick="strtestListener()">
+                    Start Test
+                </button>
+            </div>
+            <div class="fin">
+                <h1 class="timer">00:00:00</h1>
+                <div class="contpan">
+                    <button class="contbut" id="play" onclick="play(this)"
+                        style="transform: rotate(90deg);">&#916;</button>
+                    <button class="contbut" id="pause" onclick="pause(this)" style="transform: rotate(90deg);"
+                        disabled>=</button>
+                    <button class="contbut" id="stop" onclick="stop(this)" style="transform: rotate(180deg);"
+                        disabled>[_]</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+
+            let exbs = document.getElementsByClassName("exb");
+            let playBut = document.getElementById("play");
+            let pauseBut = document.getElementById("pause");
+            let stopBut = document.getElementById("stop");
+            let timerH = document.getElementsByClassName("timer")[0];
+            let selectedEx = "O1";
+
+            let times = {
+                O1: 150, O2: 180, S1: 180, S2: 240,
+                JM: 240, JA: 300, Race: 150
+            }
+
+            let currTime = 0;
+
+            let timerInterval = null;
+
+            const ebxListener = (ex, but) => {
+                selectedEx = ex;
+                for (let i = 0; i < exbs.length; i++) {
+                    exbs[i].style.outline = "";
+                }
+                let x = 0;
+                let interval = setInterval(() => {
+                    but.style.outline = x + "px solid var(--dull)";
+                    if (x >= 8)
+                        clearInterval(interval);
+                    x++;
+                }, 10)
+            }
+
+            exbs[0].click();
+
+            const strtestListener = () => {
+                const nqs = document.getElementsByClassName("qs")[0].value || 1;
+                const init = document.getElementsByClassName("init")[0];
+                init.style.display = "none";
+                const fin = document.getElementsByClassName("fin")[0];
+                fin.style.display = "flex";
+
+                currTime = times[selectedEx] * nqs;
+                timerH.innerHTML = toTextTime(currTime);
+            }
+
+            const play = but => {
+                but.disabled = true;
+                pauseBut.disabled = false;
+                stopBut.disabled = false;
+                timerInterval = setInterval(() => {
+                    timerH.innerHTML = toTextTime(currTime);
+                    currTime--;
+                }, 1000);
+            }
+
+            const pause = but => {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    return;
+                }
+                timerInterval = setInterval(() => {
+                    timerH.innerHTML = toTextTime(currTime);
+                    currTime--;
+                }, 1000);
+            }
+
+            const stop = but => {
+                window.location.reload();
+            }
+
+            const toTextTime = t => {
+
+                const a = Math.floor(t / 3600);
+                const an = String(Math.abs(a)).length;
+                const b = Math.floor(t / 60) - a * 60;
+                const bn = String(Math.abs(b)).length;
+                const c = t - a * 3600 - b * 60;
+                const cn = String(Math.abs(c)).length;
+
+                const mn = Math.max(an, bn, cn);
+                const arr = [a, b, c];
+                const arrn = [an, bn, cn];
+                let ret = "";
+                for (let i = 0; i < arr.length; i++) {
+                    const s = arr[i];
+                    const sn = arrn[i];
+                    for (let j = 0; j < (mn - sn); j++)
+                        ret += "0";
+                    ret += s;
+                    ret += ":";
+                }
+                return ret.substring(0, ret.length - 1);
+            }
+
+        </script>
+    </body>
+
+</html>
