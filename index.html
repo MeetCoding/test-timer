@@ -241,6 +241,13 @@
 
             const toTextTime = t => {
 
+                if (t < 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    timerH.style.color = "red";
+                    return "00:00:00";
+                }
+
                 const a = Math.floor(t / 3600);
                 const an = String(Math.abs(a)).length;
                 const b = Math.floor(t / 60) - a * 60;
@@ -248,7 +255,7 @@
                 const c = t - a * 3600 - b * 60;
                 const cn = String(Math.abs(c)).length;
 
-                const mn = Math.max(an, bn, cn);
+                const mn = Math.max(an, bn, cn, 2);
                 const arr = [a, b, c];
                 const arrn = [an, bn, cn];
                 let ret = "";
